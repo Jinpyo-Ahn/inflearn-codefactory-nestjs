@@ -131,3 +131,10 @@ dist
 
 # idea
 .idea
+
+# postgre-data
+./cf_sns/postgres-data
+
+# docker-compose.yaml
+./cf_sns/docker-compose.yaml
+
