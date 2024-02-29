@@ -133,8 +133,9 @@ dist
 .idea
 
 # postgre-data
-./cf_sns/postgres-data
+cf_sns/postgres-data
+typeorm-basic/postgres-data
 
 # docker-compose.yaml
-./cf_sns/docker-compose.yaml
+*.yaml
 
