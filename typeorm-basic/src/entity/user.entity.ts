@@ -3,10 +3,15 @@ import {
   CreateDateColumn,
   Entity,
   Generated,
+  JoinColumn,
+  OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
+import { ProfileModel } from './profile.entity';
+import { PostModel } from './post.entity';
 
 export enum Role {
   USER = 'user',
@@ -35,31 +40,34 @@ export class UserModel {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column()
+  email: string;
+
   // 제목
-  @Column({
-    // 데이터베이스에서 해당 데이터 타입
-    // 작성하지 않아도 자동으로 유추된다.
-    type: 'varchar',
-
-    // 데이터베이스 칼럼 이름
-    // 프로퍼티 이름으로 자동 유추된다.
-    name: 'title',
-
-    // 값의 길이
-    // 입력 할 수 있는 글자의 길이가 300
-    length: 300,
-
-    // null이 가능한지 여부
-    nullable: true,
-
-    //update 가능한지 여부
-    update: false,
-    select: false,
-
-    default: 'default value',
-    unique: false,
-  })
-  title: string;
+  // @Column({
+  //   // 데이터베이스에서 해당 데이터 타입
+  //   // 작성하지 않아도 자동으로 유추된다.
+  //   type: 'varchar',
+  //
+  //   // 데이터베이스 칼럼 이름
+  //   // 프로퍼티 이름으로 자동 유추된다.
+  //   name: 'title',
+  //
+  //   // 값의 길이
+  //   // 입력 할 수 있는 글자의 길이가 300
+  //   length: 300,
+  //
+  //   // null이 가능한지 여부
+  //   nullable: true,
+  //
+  //   //update 가능한지 여부
+  //   update: false,
+  //   select: false,
+  //
+  //   default: 'default value',
+  //   unique: false,
+  // })
+  // title: string;
 
   @Column({
     type: 'enum',
@@ -86,4 +94,24 @@ export class UserModel {
   @Column()
   @Generated('uuid')
   additionalId: string;
+
+  @OneToOne(() => ProfileModel, (profile) => profile.user, {
+    // find() 실행 할때마다 항상 같이 가져올 relation
+    eager: false,
+    // 저장할 때 relation을 한번에 같이 저장가능
+    cascade: true,
+    // relation이 null이 가능한지
+    nullable: true,
+    // 관계가 삭제됐을 때
+    // no action -> 아무것도 안함
+    // cascade -> 참조하는 Row도 같이 삭제
+    // set null -> 참조하는 Row에서 참조 id를 null로 변경
+    // set default -> 기본 세팅으로 설정(테이블의 기본 세팅)
+    // restrict -> 참조하고 있는 Row가 있는 경우 참조되는 Row 삭제 불가
+  })
+  @JoinColumn()
+  profile: ProfileModel;
+
+  @OneToMany(() => PostModel, (post) => post.author)
+  posts: PostModel[];
 }
