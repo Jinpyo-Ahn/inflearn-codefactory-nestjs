@@ -19,28 +19,137 @@ export class AppController {
     private readonly tagRepository: Repository<TagModel>,
   ) {}
 
+  @Post('sample')
+  async sample() {
+    // 모델에 해당되는 객체 생성 - 데이터베이스에는 저장은 안함
+    // const user1 = this.userRepository.create({
+    //   email: 'test@codefactory.ai',
+    // });
+
+    // 데이터베이스를 토대로 객체 생성
+    // const user2 = await this.userRepository.save({
+    //   email: 'test@codefactory.ai',
+    // });
+
+    // preload
+    // 입력된 값을 기반으로 데이터베이스에 있는 데이터를 불러오고
+    // 추가 입력된 값으로 데이터베이스에서 가져온 값들을 대체함
+    // 저장하지는 않음
+    //
+    // const user3 = await this.userRepository.preload({
+    //   id: 101,
+    //   email: 'codefactory@codefactory.ai',
+    // });
+
+    // 삭제하기
+    // await this.userRepository.delete(101);
+
+    // await this.userRepository.increment(
+    //   {
+    //     id: 1,
+    //   },
+    //   'count',
+    //   2,
+    // );
+
+    // await this.userRepository.decrement(
+    //   {
+    //     id: 1,
+    //   },
+    //   'count',
+    //   1,
+    // );
+
+    // const count = await this.userRepository.count({
+    //   where: {
+    //     email: ILike('%0%'),
+    //   },
+    // });
+    //
+    // const sum = await this.userRepository.sum('count', {
+    //   email: ILike('%0%'),
+    // });
+
+    // const average = await this.userRepository.average('count', {
+    //   id: LessThan(4),
+    // });
+
+    // const min = await this.userRepository.minimum('count', {
+    //   id: LessThan(4),
+    // });
+
+    // const max = await this.userRepository.maximum('count', {
+    //   id: LessThan(4),
+    // });
+
+    const userAndCount = await this.userRepository.findAndCount({
+      take: 20,
+    });
+
+    return userAndCount;
+  }
+
   @Post('users')
-  postUser() {
-    return this.userRepository.save({});
+  async postUser() {
+    for (let i = 0; i < 100; i++) {
+      await this.userRepository.save({
+        email: `user-${i}@google.com`,
+      });
+    }
   }
 
   @Get('users')
   getUsers(): Promise<UserModel[]> {
     return this.userRepository.find({
+      where: {
+        // 아닌 경우 가져오기
+        // id: Not(1),
+        // 보다 적은 경우 가져오기
+        // id: LessThan(30),
+        // 적은 경우 or 같은 경우
+        // id: LessThanOrEqual(30),
+        // 많은 경우
+        // id: MoreThan(30),
+        // 많거나 같은 경우
+        // id: MoreThanOrEqual(30),
+        // id: Equal(30),
+        // email: Like('%0%'),
+        // 대문자 소문자 구분 안하는 유사값
+        // email: ILike('%GOOGLE%'),
+        // id: Between(10, 15),
+        // 해당되는 여러 개의 값
+        // id: In([1, 4, 6, 99]),
+        // 값이 NULL인 경우 가져오기
+        // id: IsNull(),
+      },
       // 어떤 프로퍼티를 선택할지
       // 기본은 모든 프로퍼티를 가져온다.
       // 만약에 select를 정의하지 않으면 모든 프로퍼티
       // select를 정의하면 정의된 프로퍼티들만 가져온다.
-      select: {
-        id: true,
-        createdAt: true,
-        updatedAt: true,
-        version: true,
-      },
+      // select: {
+      //   id: true,
+      //   createdAt: true,
+      //   updatedAt: true,
+      //   version: true,
+      //   profile: {
+      //     id: true,
+      //   },
+      // },
       // 필터링할 조건을 입력하게 된다.
-      where: {
-        version: 1,
+      // 관계를 가져오는 법
+      // relations: {
+      //   profile: true,
+      // },
+      // 오름차 내림차
+      // ASC - > 오름차
+      // DESC -> 내림차
+      order: {
+        id: 'ASC',
       },
+      // 처음 몇개를 제외할 지
+      // skip: 0,
+      // 몇개를 가져올 지
+      // take: 0,
     });
   }
 
@@ -54,6 +163,7 @@ export class AppController {
 
     return this.userRepository.save({
       ...user,
+      email: user.email + '0',
     });
   }
 
