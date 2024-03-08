@@ -11,42 +11,6 @@ import { InjectRepository } from '@nestjs/typeorm';
  * commentCount: number;
  */
 
-export interface PostModel {
-  id: number;
-  author: string;
-  title: string;
-  content: string;
-  likeCount: number;
-  commentCount: number;
-}
-
-export const posts: PostModel[] = [
-  {
-    id: 1,
-    author: 'newjeans_official',
-    title: '뉴진스 민지',
-    content: '메이크업 고치고 있는 민지',
-    likeCount: 100000,
-    commentCount: 99999,
-  },
-  {
-    id: 2,
-    author: 'newjeans_official',
-    title: '뉴진스 해린',
-    content: '노래 연습 하고 있는 해린',
-    likeCount: 100000,
-    commentCount: 99999,
-  },
-  {
-    id: 3,
-    author: 'blackpink_official',
-    title: '블랙핑크 로제',
-    content: '종합운동장에서 공연 중인 로제',
-    likeCount: 100000,
-    commentCount: 99999,
-  },
-];
-
 @Injectable()
 export class PostsService {
   constructor(
@@ -55,7 +19,9 @@ export class PostsService {
   ) {}
 
   async getAllPost(): Promise<PostsModel[]> {
-    return this.postsRepository.find();
+    return this.postsRepository.find({
+      relations: ['author'],
+    });
   }
 
   async getPostById(id: number): Promise<PostsModel> {
@@ -63,6 +29,7 @@ export class PostsService {
       where: {
         id,
       },
+      relations: ['author'],
     });
 
     if (!post) {
@@ -72,12 +39,14 @@ export class PostsService {
     return post;
   }
 
-  async createPost(author: string, title: string, content: string) {
+  async createPost(authorId: number, title: string, content: string) {
     // 1) create -> 저장할 객체를 생성한다.
     // 2) save -> 객체를 저장한다. 단, create 메서드로 생성한 객체이다.
 
     const post = this.postsRepository.create({
-      author,
+      author: {
+        id: authorId,
+      },
       title,
       content,
       likeCount: 0,
@@ -91,7 +60,6 @@ export class PostsService {
 
   async updatePost(
     postId: number,
-    author?: string,
     title?: string,
     content?: string,
   ): Promise<PostsModel> {
@@ -109,10 +77,6 @@ export class PostsService {
 
     if (!post) {
       throw new NotFoundException();
-    }
-
-    if (author) {
-      post.author = author;
     }
 
     if (title) {
